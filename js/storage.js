@@ -300,7 +300,7 @@ const BACKUP_SNOOZE_MS = 3 * 24 * 60 * 60 * 1000;
 
 export async function shouldShowBackupBanner() {
   const entries = await getEntries();
-  if (entries.length === 0) return false;
+  if (!entries.some((e) => e.committed)) return false;
 
   const lastBackupAt = Number(localStorage.getItem(LAST_BACKUP_KEY)) || getFirstOpenAt();
   if (Date.now() - lastBackupAt < BACKUP_REMIND_AFTER_MS) return false;
