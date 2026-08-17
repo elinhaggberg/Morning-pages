@@ -39,6 +39,37 @@
   <button class="fab hidden" id="add-btn" aria-label="Add another page"><svg class="icon" viewBox="0 0 448 512" aria-hidden="true" focusable="false"><path d="M256 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 160-160 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l160 0 0 160c0 17.7 14.3 32 32 32s32-14.3 32-32l0-160 160 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-160 0 0-160z"/></svg></button>
 </template>
 
+<!-- ===== How this app works (onboarding, shown once, before setup) ===== -->
+<template id="tpl-how-it-works">
+  <div class="sheet">
+    <header class="sheet-header">
+      <h2>How this app works</h2>
+      <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+    <div class="instructions-body">
+      <section>
+        <h3>A page a day</h3>
+        <p>Open the app and it goes straight to a blank page — no prompts, no setup. A quiet word count at the bottom tracks against a daily goal (750 words by default, about three handwritten pages) with a small checkmark once you reach it. Keep writing past it or stop early — entirely up to you.</p>
+      </section>
+      <section>
+        <h3>Save to log, or just write</h3>
+        <p>Tap <strong>Save to log</strong> to file a page away as a card and start fresh — useful if you want to write more than once a day, diary-style. Everything autosaves as you type either way. My Log and the Calendar, in the menu, hold everything you've written and let you catch up on a day you missed.</p>
+      </section>
+      <section>
+        <h3>Install it before setting up your passphrase</h3>
+        <p>If you plan to add this to your Home Screen, do that first — before choosing your four words next. On some phones, especially iPhone, the installed app and this browser tab keep separate storage, so setting everything up here and installing afterward could mean starting over from scratch.</p>
+      </section>
+      <section>
+        <h3>Deleting the app deletes everything, silently</h3>
+        <p>Removing this app from your Home Screen — or clearing this site's data in your browser — erases every page and your passphrase instantly. There's no warning, no confirmation, and no undo. That's exactly why regular backups matter: <strong>Export &amp; manage data</strong>, in the menu, any time you like.</p>
+      </section>
+    </div>
+    <div class="form-actions">
+      <button type="button" class="text-btn primary" id="how-it-works-got-it-btn">Got it</button>
+    </div>
+  </div>
+</template>
+
 <!-- ===== My Log ===== -->
 <template id="tpl-log">
   <header class="topbar">

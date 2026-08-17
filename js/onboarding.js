@@ -1,5 +1,6 @@
 import { setupPassphrase, adoptConfig, verifyAgainstConfig, unlock, normalizePhrase } from "./crypto.js";
 import { importEntries } from "./storage.js";
+import { openSheet } from "./sheet.js";
 
 function wordInputsRow(values = ["", "", "", ""]) {
   const row = document.createElement("div");
@@ -14,11 +15,14 @@ function readWords(row) {
   return [...row.querySelectorAll(".word-input")].map((i) => i.value);
 }
 
-// Runs the full first-open flow: explain why pages are encrypted, let the
-// person choose their own four words, make them confirm it and save it
-// somewhere safe, then a short "how this works" -- or, via the restore
-// link on the very first screen, skip straight to recovering an existing
-// backup instead of creating a new phrase.
+// Runs the full first-open flow: a general "how this app works" orientation
+// first (crucially, before anything is set up, since it's the one chance to
+// say "install this now, before choosing a passphrase, or you may end up
+// setting one up somewhere you won't be using day to day"), then why pages
+// are encrypted, letting the person choose their own four words, and making
+// them confirm it and save it somewhere safe -- or, via the restore link on
+// the privacy screen, skip straight to recovering an existing backup
+// instead of creating a new phrase.
 export function renderOnboarding(root, onComplete) {
   function show(buildFn) {
     root.replaceChildren();
@@ -29,6 +33,21 @@ export function renderOnboarding(root, onComplete) {
     view.appendChild(card);
     root.appendChild(view);
     buildFn(card);
+  }
+
+  // The Make It Local family's standard first-open explainer -- same
+  // template shape, sections, and "Got it" button as Creative Daily's
+  // tpl-how-it-works, just triggered here instead of from Home (there's no
+  // Home yet without a passphrase) and chaining into the rest of setup
+  // once dismissed, rather than just closing.
+  function showHowItWorksSheet() {
+    const sheet = openSheet("tpl-how-it-works", { dismissible: false });
+    const proceed = () => {
+      sheet.close();
+      showIntro();
+    };
+    sheet.el.querySelector(".close-btn").addEventListener("click", proceed);
+    sheet.el.querySelector("#how-it-works-got-it-btn").addEventListener("click", proceed);
   }
 
   function showIntro() {
@@ -123,12 +142,13 @@ export function renderOnboarding(root, onComplete) {
           <strong>There is no password reset.</strong> If you lose these four words, every page you've written becomes permanently unreadable — there is no other way in.
           <p>Save your passphrase in a secure location — physical or a password manager is recommended.</p>
         </div>
+        <p class="settings-note">Once this is set, opening the app or writing a fresh page will never ask for it — only <strong>Save to log</strong>, and opening a page you already saved.</p>
         <label class="onboarding-checkbox-row">
           <input type="checkbox" id="ob-saved-check" />
           <span>I've saved this phrase somewhere safe</span>
         </label>
         <div class="onboarding-actions">
-          <button type="button" class="text-btn primary" id="ob-save-continue-btn" disabled>Continue</button>
+          <button type="button" class="text-btn primary" id="ob-save-continue-btn" disabled>Start writing</button>
         </div>
       `;
       card.querySelector("#ob-copy-btn").addEventListener("click", async () => {
@@ -147,38 +167,8 @@ export function renderOnboarding(root, onComplete) {
       continueBtn.addEventListener("click", async () => {
         continueBtn.disabled = true;
         await setupPassphrase(words);
-        showHowItWorks();
+        onComplete();
       });
-    });
-  }
-
-  function showHowItWorks() {
-    show((card) => {
-      card.innerHTML = `
-        <h1 class="onboarding-title">How this works</h1>
-        <div class="onboarding-body instructions-body">
-          <section>
-            <h3>A page a day</h3>
-            <p>Open the app and start writing — no prompts, no setup. A quiet word count at the bottom tracks against a daily goal (750 words by default, about three handwritten pages), with a small checkmark once you reach it. Keep going or stop early — it's entirely up to you.</p>
-          </section>
-          <section>
-            <h3>Save to log, or just write</h3>
-            <p>Tap <strong>Save to log</strong> whenever you're done to file today's page away as a card. Everything also autosaves as you type either way, so nothing is lost if you close the app mid-thought.</p>
-          </section>
-          <section>
-            <h3>Your phrase, only when it matters</h3>
-            <p>Opening the app or writing a fresh page never asks for your four words. They're asked for at exactly two moments: saving a page to your permanent log, and opening a page you already saved. Until either of those happens, a page in progress is still encrypted, just not yet under your phrase — filing it away is what actually locks it for good.</p>
-          </section>
-          <section>
-            <h3>Your data, your device</h3>
-            <p>Everything lives only in this browser, on this device, fully encrypted — no account, no server. Back it up from the menu every so often; the exported file stays encrypted too, so it's safe to store anywhere.</p>
-          </section>
-        </div>
-        <div class="onboarding-actions">
-          <button type="button" class="text-btn primary" id="ob-start-btn">Start writing</button>
-        </div>
-      `;
-      card.querySelector("#ob-start-btn").addEventListener("click", onComplete);
     });
   }
 
@@ -251,5 +241,5 @@ export function renderOnboarding(root, onComplete) {
     });
   }
 
-  showIntro();
+  showHowItWorksSheet();
 }
