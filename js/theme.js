@@ -18,10 +18,10 @@ export const PLAYFUL_SWATCHES = [
 
 const THEME_BG = { dark: "#150f24", light: "#f6f7f9", playful: "#f7f0e4" };
 
-// Dark (a quiet, pre-dawn page) is the default look here, unlike the rest
-// of the family -- morning pages are traditionally written before first
-// light, and a dim page is easier on the eyes at 6am than a bright one.
-const DEFAULT_PREF = { mode: "dark", playfulAccent: "midnight" };
+// Playful with the Midnight accent -- the same default look as the rest of
+// the family, just leaning into its darkest, most pre-dawn-appropriate
+// accent color rather than a different mode entirely.
+const DEFAULT_PREF = { mode: "playful", playfulAccent: "midnight" };
 
 export function getTheme() {
   return { ...DEFAULT_PREF, ...getThemePref() };
