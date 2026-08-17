@@ -1,0 +1,15 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <rect width="512" height="512" fill="#20163a"/>
+  <g fill="none" stroke="#f6f1e4" stroke-width="16" stroke-linecap="round" stroke-linejoin="round">
+    <!-- horizon -->
+    <line x1="96" y1="340" x2="416" y2="340"/>
+    <!-- half circle sun -->
+    <path d="M160,340 A96,96 0 0 1 352,340"/>
+    <!-- rays -->
+    <line x1="256" y1="228" x2="256" y2="140"/>
+    <line x1="312" y1="243" x2="350" y2="177"/>
+    <line x1="200" y1="243" x2="162" y2="177"/>
+    <line x1="353" y1="284" x2="394" y2="260"/>
+    <line x1="159" y1="284" x2="118" y2="260"/>
+  </g>
+</svg>

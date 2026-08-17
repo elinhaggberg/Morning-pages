@@ -1,0 +1,319 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<script>
+  try {
+    var themeMode = (JSON.parse(localStorage.getItem("mp_theme_v1") || "{}") || {}).mode;
+    document.documentElement.dataset.theme = themeMode || "dark";
+  } catch (e) {}
+</script>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<title>Morning Pages</title>
+<meta name="description" content="A private, encrypted space for daily morning pages. No accounts, no cloud -- just you and the page." />
+<meta name="theme-color" content="#150f24" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" href="icons/icon-192.png" />
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="default" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<div id="app"></div>
+
+<!-- ===== Home ===== -->
+<template id="tpl-home">
+  <header class="topbar home-topbar">
+    <p class="home-daynum" id="home-daynum"></p>
+    <button class="icon-btn menu-btn" id="menu-btn" aria-label="Menu"><svg class="icon icon-line" viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke-width="2.2" stroke-linecap="round"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17"/></svg></button>
+  </header>
+  <div id="backup-banner" class="banner hidden">
+    <p>You haven't backed up in a while — export takes a second, and the file stays encrypted.</p>
+    <div class="banner-actions">
+      <button type="button" class="text-btn primary" id="backup-now-btn">Back up now</button>
+      <button type="button" class="text-btn" id="backup-dismiss-btn">Later</button>
+    </div>
+  </div>
+  <div class="page-body" id="home-body"></div>
+  <button class="fab hidden" id="add-btn" aria-label="Add another page"><svg class="icon" viewBox="0 0 448 512" aria-hidden="true" focusable="false"><path d="M256 64c0-17.7-14.3-32-32-32s-32 14.3-32 32l0 160-160 0c-17.7 0-32 14.3-32 32s14.3 32 32 32l160 0 0 160c0 17.7 14.3 32 32 32s32-14.3 32-32l0-160 160 0c17.7 0 32-14.3 32-32s-14.3-32-32-32l-160 0 0-160z"/></svg></button>
+</template>
+
+<!-- ===== My Log ===== -->
+<template id="tpl-log">
+  <header class="topbar">
+    <button class="icon-btn back-btn" aria-label="Back"><svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 288 480 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-370.7 0 105.4-105.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></button>
+    <h1>My Log</h1>
+    <button class="icon-btn" id="menu-btn" aria-label="Menu"><svg class="icon icon-line" viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke-width="2.2" stroke-linecap="round"><path d="M3.5 6.5h17M3.5 12h17M3.5 17.5h17"/></svg></button>
+  </header>
+  <div class="page-body">
+    <div class="day-grid" id="log-grid"></div>
+  </div>
+</template>
+
+<!-- ===== Calendar ===== -->
+<template id="tpl-calendar">
+  <header class="topbar">
+    <button class="icon-btn back-btn" aria-label="Back"><svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path d="M9.4 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 288 480 288c17.7 0 32-14.3 32-32s-14.3-32-32-32l-370.7 0 105.4-105.4c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0l-160 160z"/></svg></button>
+    <h1>Calendar</h1>
+  </header>
+  <div class="calendar-scroll">
+    <div class="calendar-nav">
+      <button type="button" class="icon-btn" id="calendar-prev-btn" aria-label="Previous month"><svg class="icon" viewBox="0 0 320 512" aria-hidden="true" focusable="false"><path d="M41 233.4c-12.5 12.5-12.5 32.8 0 45.3l160 160c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L109.3 256 246.6 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L41 233.4z"/></svg></button>
+      <span id="calendar-month-label" class="calendar-month-label"></span>
+      <button type="button" class="icon-btn" id="calendar-next-btn" aria-label="Next month"><svg class="icon" viewBox="0 0 320 512" aria-hidden="true" focusable="false"><path d="M278.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-160 160c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L210.7 256 73.4 118.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l160 160z"/></svg></button>
+    </div>
+    <div class="calendar-weekdays" id="calendar-weekdays"></div>
+    <div class="calendar-grid" id="calendar-grid"></div>
+    <div class="calendar-legend">
+      <span><i class="legend-dot is-done"></i> Written</span>
+    </div>
+    <p class="calendar-hint">Tap any missed date to write a page for it retroactively.</p>
+  </div>
+</template>
+
+<!-- ===== Entry editor (full-screen writing sheet) ===== -->
+<template id="tpl-entry-editor">
+  <div class="sheet entry-editor-sheet">
+    <header class="sheet-header">
+      <div class="entry-editor-heading">
+        <h2 id="entry-editor-title">New page</h2>
+        <p class="entry-editor-date hidden" id="entry-editor-date"></p>
+      </div>
+      <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+    <div id="entry-editor-slot"></div>
+  </div>
+</template>
+
+<!-- ===== Entry detail (read-only preview) ===== -->
+<template id="tpl-entry-detail">
+  <div class="sheet entry-detail-sheet">
+    <header class="sheet-header">
+      <span class="entry-detail-meta" id="entry-detail-meta"></span>
+      <button class="icon-btn" id="entry-detail-edit-btn" aria-label="Edit" title="Edit"><svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><path d="M352.9 21.2L308 66.1 445.9 204 490.8 159.1C504.4 145.6 512 127.2 512 108s-7.6-37.6-21.2-51.1L455.1 21.2C441.6 7.6 423.2 0 404 0s-37.6 7.6-51.1 21.2zM274.1 100L58.9 315.1c-10.7 10.7-18.5 24.1-22.6 38.7L.9 481.6c-2.3 8.3 0 17.3 6.2 23.4s15.1 8.5 23.4 6.2l127.8-35.5c14.6-4.1 27.9-11.8 38.7-22.6L412 237.9 274.1 100z"/></svg></button>
+      <button class="icon-btn" id="entry-detail-delete-btn" aria-label="Delete" title="Delete"><svg class="icon" viewBox="0 0 448 512" aria-hidden="true" focusable="false"><path d="M136.7 5.9C141.1-7.2 153.3-16 167.1-16l113.9 0c13.8 0 26 8.8 30.4 21.9L320 32 416 32c17.7 0 32 14.3 32 32s-14.3 32-32 32L32 96C14.3 96 0 81.7 0 64S14.3 32 32 32l96 0 8.7-26.1zM32 144l384 0 0 304c0 35.3-28.7 64-64 64L96 512c-35.3 0-64-28.7-64-64l0-304zm88 64c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24zm104 0c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24zm104 0c-13.3 0-24 10.7-24 24l0 192c0 13.3 10.7 24 24 24s24-10.7 24-24l0-192c0-13.3-10.7-24-24-24z"/></svg></button>
+      <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+    <div class="entry-card-body" id="entry-detail-body"></div>
+  </div>
+</template>
+
+<!-- ===== Day detail ===== -->
+<template id="tpl-day-detail">
+  <div class="sheet day-detail-sheet">
+    <header class="sheet-header">
+      <div class="day-detail-heading">
+        <p class="day-detail-daynum" id="day-detail-daynum"></p>
+        <h2 id="day-detail-date"></h2>
+      </div>
+      <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+    <p class="empty-state hidden" id="day-detail-empty">Nothing written for this day yet.</p>
+    <div id="day-detail-entries" class="entry-stack"></div>
+    <div class="form-actions">
+      <button type="button" class="text-btn secondary" id="day-detail-add-btn">+ Add a page to this day</button>
+    </div>
+  </div>
+</template>
+
+<!-- ===== Settings ===== -->
+<template id="tpl-settings-menu">
+  <div class="sheet">
+    <header class="sheet-header">
+      <h2>Menu</h2>
+      <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+    <button type="button" class="menu-item" id="log-btn">
+      <svg class="icon icon-line" viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke-width="2.1" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      <span>My Log</span>
+    </button>
+    <button type="button" class="menu-item" id="calendar-btn">
+      <svg class="icon icon-line" viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>
+      <span>Calendar &amp; catch up</span>
+    </button>
+    <button type="button" class="menu-item" id="instructions-btn">
+      <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><circle cx="256" cy="256" r="216" fill="none" stroke="currentColor" stroke-width="40" /><circle cx="256" cy="176" r="28" /><rect x="228" y="232" width="56" height="180" rx="12" /></svg>
+      <span>Instructions</span>
+    </button>
+    <button type="button" class="menu-item" id="customize-btn">
+      <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><rect x="32" y="86" width="448" height="32" rx="16" /><circle cx="176" cy="102" r="40" /><rect x="32" y="240" width="448" height="32" rx="16" /><circle cx="336" cy="256" r="40" /><rect x="32" y="394" width="448" height="32" rx="16" /><circle cx="256" cy="410" r="40" /></svg>
+      <span>Customize</span>
+    </button>
+    <button type="button" class="menu-item" id="data-btn">
+      <svg class="icon icon-line" viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a8 3 0 0 0 16 0A8 3 0 0 0 4 6zM4 6v12a8 3 0 0 0 16 0V6"/><path d="M4 12a8 3 0 0 0 16 0"/></svg>
+      <span>Export &amp; manage data</span>
+    </button>
+    <button type="button" class="menu-item" id="import-btn">
+      <svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M64 0C28.7 0 0 28.7 0 64l0 240 182.1 0-31-31c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l72 72c9.4 9.4 9.4 24.6 0 33.9l-72 72c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l31-31-182.1 0 0 96c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-277.5c0-17-6.7-33.3-18.7-45.3L258.7 18.7C246.7 6.7 230.5 0 213.5 0L64 0zM325.5 176L232 176c-13.3 0-24-10.7-24-24L208 58.5 325.5 176z"/></svg>
+      <span>Import a backup</span>
+    </button>
+    <button type="button" class="menu-item" id="lock-btn">
+      <svg class="icon icon-line" viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/></svg>
+      <span>Lock now</span>
+    </button>
+    <button type="button" class="menu-item" id="app-library-link-btn">
+      <svg class="icon" viewBox="0 0 448 512" aria-hidden="true" focusable="false"><path d="M64 32C28.7 32 0 60.7 0 96l0 64c0 35.3 28.7 64 64 64l64 0c35.3 0 64-28.7 64-64l0-64c0-35.3-28.7-64-64-64L64 32zM64 224c-35.3 0-64 28.7-64 64l0 64c0 35.3 28.7 64 64 64l64 0c35.3 0 64-28.7 64-64l0-64c0-35.3-28.7-64-64-64l-64 0zM256 96l0 64c0 35.3 28.7 64 64 64l64 0c35.3 0 64-28.7 64-64l0-64c0-35.3-28.7-64-64-64l-64 0c-35.3 0-64 28.7-64 64zM320 224c-35.3 0-64 28.7-64 64l0 64c0 35.3 28.7 64 64 64l64 0c35.3 0 64-28.7 64-64l0-64c0-35.3-28.7-64-64-64l-64 0z"/></svg>
+      <span>App Library</span>
+    </button>
+  </div>
+</template>
+
+<!-- ===== Data management ===== -->
+<template id="tpl-data-management">
+  <div class="sheet">
+    <header class="sheet-header">
+      <h2>Export &amp; manage data</h2>
+      <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+
+    <p class="card-detail-section-label">Full backup</p>
+    <p class="settings-note">Every page, still fully encrypted — safe to store anywhere, but only ever readable with your four words.</p>
+    <div class="form-actions">
+      <button type="button" class="text-btn primary" id="data-export-all-btn">Export everything</button>
+    </div>
+
+    <p class="card-detail-section-label" style="margin-top:24px;">Danger zone</p>
+    <p class="settings-note">Erases every page and this device's passphrase. Export a backup first if you want to keep anything.</p>
+    <div class="form-actions">
+      <button type="button" class="text-btn danger" id="data-erase-btn">Erase everything &amp; start over</button>
+    </div>
+  </div>
+</template>
+
+<!-- ===== Guides / Instructions ===== -->
+<template id="tpl-instructions">
+  <div class="sheet instructions-sheet">
+    <header class="sheet-header">
+      <h2>Instructions</h2>
+      <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+    <div class="instructions-body">
+      <section>
+        <h3>Installing on your phone</h3>
+        <p>This is a web app, not an app-store app — but you can add it to your Home Screen so it opens full-screen, just like a regular app.</p>
+        <p><strong>iOS (Safari):</strong> tap the Share icon, then "Add to Home Screen".</p>
+        <p><strong>Android (Chrome):</strong> tap the ⋮ menu, then "Add to Home screen" (or "Install app").</p>
+      </section>
+      <section>
+        <h3>Writing a page</h3>
+        <p>Open the app and it goes straight to a blank page — no setup, no prompts. Write anything, in any direction; morning pages aren't meant to be good, they're meant to clear your head. The word count at the bottom is just a quiet marker against a daily goal (750 words, roughly three handwritten pages, by default — change it any time in Customize) with a small checkmark once you reach it. There's no requirement to stop there, or to reach it at all.</p>
+      </section>
+      <section>
+        <h3>Saving to your log</h3>
+        <p>Tap <strong>Save to log</strong> to file a page away as a card and start fresh. Everything autosaves as you type regardless, so closing the app mid-page never loses your words — reopening resumes exactly where you left off.</p>
+      </section>
+      <section>
+        <h3>More than one page a day</h3>
+        <p>Once a day has a page saved to the log, a small <strong>+</strong> appears to start another — useful if you want to use this more like a diary than a single morning ritual.</p>
+      </section>
+      <section>
+        <h3>Privacy &amp; the four words</h3>
+        <p>Every page is encrypted with the four-word phrase you set up when you first opened the app. It's never stored anywhere, which means every fresh visit asks for it again — and it also means there is no password reset. Losing the phrase means losing everything written under it, permanently.</p>
+        <p>A page's actual text is never shown anywhere except right after you tap to open it — cards in My Log and the Calendar only ever show a date, a time, and a word count.</p>
+      </section>
+      <section>
+        <h3>Day counting, not streaks</h3>
+        <p>There's no streak to lose. The small "Day N" label only moves forward the next time you write something new — skip a day (or a week) and it simply waits for you at the same number until you pick it back up.</p>
+      </section>
+      <section>
+        <h3>My Log &amp; the Calendar</h3>
+        <p>My Log holds every day you've ever written something. The Calendar (in this menu) lets you catch up on a day you skipped — tap a missed day to write something for it retroactively.</p>
+      </section>
+      <section>
+        <h3>Your data, your device</h3>
+        <p>Everything lives only in this browser, on this device — there's no account and no server. <strong>Export &amp; manage data</strong> lets you export a full, still-encrypted backup at any time.</p>
+        <p><strong>Removing the app from your Home Screen deletes its saved data too.</strong> Export a backup every so often.</p>
+      </section>
+    </div>
+  </div>
+</template>
+
+<!-- ===== Customize ===== -->
+<template id="tpl-customize">
+  <div class="sheet">
+    <header class="sheet-header">
+      <h2>Customize</h2>
+      <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+    <div class="theme-option-list">
+      <button type="button" class="theme-option" data-theme-mode="dark">
+        <span class="theme-swatch-preview dark"></span>
+        <span>Dark</span>
+      </button>
+      <button type="button" class="theme-option" data-theme-mode="light">
+        <span class="theme-swatch-preview light"></span>
+        <span>Light</span>
+      </button>
+      <button type="button" class="theme-option" data-theme-mode="playful">
+        <span class="theme-swatch-preview playful"></span>
+        <span>Playful</span>
+      </button>
+    </div>
+    <div class="playful-accent-picker hidden" id="playful-accent-picker">
+      <p class="playful-accent-label">Accent color</p>
+      <div class="swatch-row" id="playful-swatch-row"></div>
+    </div>
+    <p class="card-detail-section-label" style="margin-top:20px;">Daily word goal</p>
+    <p class="settings-note">Traditionally three handwritten pages — about 750 words. Change it to whatever fits you.</p>
+    <label class="field">
+      <input type="number" id="word-goal-input" min="1" step="1" />
+    </label>
+  </div>
+</template>
+
+<!-- ===== Import ===== -->
+<template id="tpl-import">
+  <div class="sheet">
+    <header class="sheet-header">
+      <h2>Import</h2>
+      <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+    <p class="import-hint">Choose an exported Morning Pages backup file. It can only be imported into a device already unlocked with the same four words it was made under.</p>
+    <button type="button" class="text-btn primary import-file-btn">Choose file…</button>
+    <input type="file" accept="application/json,.json" class="import-file-input" hidden />
+    <p class="import-message" aria-live="polite"></p>
+  </div>
+</template>
+
+<!-- ===== App Library promo ===== -->
+<template id="tpl-app-library-promo">
+  <div class="sheet confirm-sheet">
+    <h2 class="confirm-title">Make it Local App Library</h2>
+    <p class="confirm-message">This app is part of the Make it Local App Library, a collection of simple, open source, local storage apps like this one.</p>
+    <div class="form-actions">
+      <button type="button" class="text-btn secondary cancel-btn">Close</button>
+      <a class="text-btn primary" href="https://makeitlocal.app" target="_blank" rel="noopener">Visit library</a>
+    </div>
+  </div>
+</template>
+
+<!-- ===== Confirm delete ===== -->
+<template id="tpl-confirm-delete">
+  <div class="sheet confirm-sheet">
+    <h2 class="confirm-title">Delete?</h2>
+    <p class="confirm-message"></p>
+    <div class="form-actions">
+      <button type="button" class="text-btn secondary cancel-btn">Cancel</button>
+      <button type="button" class="text-btn danger confirm-btn">Delete</button>
+    </div>
+  </div>
+</template>
+
+<!-- ===== What's new ===== -->
+<template id="tpl-whats-new">
+  <div class="sheet">
+    <header class="sheet-header">
+      <h2>What's new</h2>
+      <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+    <div class="whats-new-body" id="whats-new-body"></div>
+    <div class="form-actions">
+      <button type="button" class="text-btn primary" id="whats-new-got-it-btn">Got it</button>
+    </div>
+  </div>
+</template>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
