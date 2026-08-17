@@ -121,6 +121,7 @@ export function renderOnboarding(root, onComplete) {
         <button type="button" class="text-btn secondary onboarding-copy-btn" id="ob-copy-btn">Copy</button>
         <div class="onboarding-warning">
           <strong>There is no password reset.</strong> If you lose these four words, every page you've written becomes permanently unreadable — there is no other way in.
+          <p>Save your passphrase in a secure location — physical or a password manager is recommended.</p>
         </div>
         <label class="onboarding-checkbox-row">
           <input type="checkbox" id="ob-saved-check" />

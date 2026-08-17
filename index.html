@@ -104,7 +104,6 @@
   <div class="sheet day-detail-sheet">
     <header class="sheet-header">
       <div class="day-detail-heading">
-        <p class="day-detail-daynum" id="day-detail-daynum"></p>
         <h2 id="day-detail-date"></h2>
       </div>
       <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
@@ -135,6 +134,10 @@
     <button type="button" class="menu-item" id="instructions-btn">
       <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><circle cx="256" cy="256" r="216" fill="none" stroke="currentColor" stroke-width="40" /><circle cx="256" cy="176" r="28" /><rect x="228" y="232" width="56" height="180" rx="12" /></svg>
       <span>Instructions</span>
+    </button>
+    <button type="button" class="menu-item" id="about-btn">
+      <svg class="icon icon-line" viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span>About Morning Pages</span>
     </button>
     <button type="button" class="menu-item" id="customize-btn">
       <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><rect x="32" y="86" width="448" height="32" rx="16" /><circle cx="176" cy="102" r="40" /><rect x="32" y="240" width="448" height="32" rx="16" /><circle cx="336" cy="256" r="40" /><rect x="32" y="394" width="448" height="32" rx="16" /><circle cx="256" cy="410" r="40" /></svg>
@@ -213,10 +216,6 @@
         <p>A page's actual text is never shown anywhere except right after you tap to open it — cards in My Log and the Calendar only ever show a date, a time, and a word count.</p>
       </section>
       <section>
-        <h3>Day counting, not streaks</h3>
-        <p>There's no streak to lose. The small "Day N" label only moves forward the next time you write something new — skip a day (or a week) and it simply waits for you at the same number until you pick it back up.</p>
-      </section>
-      <section>
         <h3>My Log &amp; the Calendar</h3>
         <p>My Log holds every day you've ever written something. The Calendar (in this menu) lets you catch up on a day you skipped — tap a missed day to write something for it retroactively.</p>
       </section>
@@ -224,6 +223,34 @@
         <h3>Your data, your device</h3>
         <p>Everything lives only in this browser, on this device — there's no account and no server. <strong>Export &amp; manage data</strong> lets you export a full, still-encrypted backup at any time.</p>
         <p><strong>Removing the app from your Home Screen deletes its saved data too.</strong> Export a backup every so often.</p>
+      </section>
+    </div>
+  </div>
+</template>
+
+<!-- ===== About Morning Pages (guide) ===== -->
+<template id="tpl-about">
+  <div class="sheet instructions-sheet">
+    <header class="sheet-header">
+      <h2>About Morning Pages</h2>
+      <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+    <div class="instructions-body">
+      <section>
+        <h3>Where the practice comes from</h3>
+        <p>Morning Pages were introduced by <strong>Julia Cameron</strong> in her 1992 book <strong>The Artist's Way</strong>, where they're the foundational daily tool of her twelve-week course in creative recovery. Millions of people have used the book's program since; the pages are the one piece of it that tends to outlast the rest.</p>
+      </section>
+      <section>
+        <h3>The practice itself</h3>
+        <p>Three pages, longhand, first thing in the morning — before email, before the day has a chance to get its hooks in. Whatever's in your head goes on the page: complaints, plans, fragments, nonsense. There's no wrong way to do it, and no editing as you go.</p>
+      </section>
+      <section>
+        <h3>Not meant to be read</h3>
+        <p>Cameron is specific about this: the pages aren't for anyone, including — deliberately — a later version of you. Rereading them defeats the point, which is to empty your mind onto paper without performing for an audience of any kind. She's described them as something closer to a daily meditation than a piece of writing.</p>
+      </section>
+      <section>
+        <h3>Go deeper</h3>
+        <p>This app follows the spirit of the practice but is a small, informal digital stand-in — <strong>The Artist's Way</strong> by Julia Cameron is worth reading in full for the complete course, including everything the pages are meant to support.</p>
       </section>
     </div>
   </div>

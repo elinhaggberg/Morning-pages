@@ -21,6 +21,10 @@ export function openSettingsMenu(refresh) {
     sheet.close();
     openInstructions();
   });
+  el.querySelector("#about-btn").addEventListener("click", () => {
+    sheet.close();
+    openAbout();
+  });
   el.querySelector("#customize-btn").addEventListener("click", () => {
     sheet.close();
     openCustomize();
@@ -50,6 +54,11 @@ function openAppLibraryPromo() {
 
 function openInstructions() {
   const sheet = openSheet("tpl-instructions");
+  sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
+}
+
+function openAbout() {
+  const sheet = openSheet("tpl-about");
   sheet.el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
 }
 

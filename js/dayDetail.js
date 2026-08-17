@@ -1,4 +1,4 @@
-import { getEntriesForDate, getDraftForDate, getDayNumber } from "./storage.js";
+import { getEntriesForDate, getDraftForDate } from "./storage.js";
 import { openSheet } from "./sheet.js";
 import { formatDate } from "./util.js";
 import { createEntryCardNode } from "./entryCard.js";
@@ -19,8 +19,6 @@ export async function openDayDetail(dateKey, { onChange } = {}) {
   el.querySelector(".close-btn").addEventListener("click", () => sheet.close());
 
   async function refresh() {
-    const dayNumber = await getDayNumber(dateKey);
-    el.querySelector("#day-detail-daynum").textContent = `Day ${dayNumber}`;
     el.querySelector("#day-detail-date").textContent = formatDate(dateKey);
 
     const entries = await getEntriesForDate(dateKey);

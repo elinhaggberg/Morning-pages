@@ -1,4 +1,4 @@
-import { getDayNumber, todayKey, getCommittedForDate, getDraftForDate, shouldShowBackupBanner, dismissBackupBanner, markBackedUp, exportBackupData } from "../storage.js";
+import { todayKey, getCommittedForDate, getDraftForDate, shouldShowBackupBanner, dismissBackupBanner, markBackedUp, exportBackupData } from "../storage.js";
 import { getConfig } from "../crypto.js";
 import { formatDate } from "../util.js";
 import { buildEditorEl } from "../editor.js";
@@ -14,8 +14,7 @@ export async function renderHome(root, nav) {
   root.replaceChildren(tpl.content.cloneNode(true));
 
   const today = todayKey();
-  const dayNumber = await getDayNumber(today);
-  root.querySelector("#home-daynum").innerHTML = `Day ${dayNumber}<span class="home-date">${formatDate(today)}</span>`;
+  root.querySelector("#home-daynum").textContent = formatDate(today);
 
   root.querySelector("#menu-btn").addEventListener("click", () => openSettingsMenu(refresh));
 

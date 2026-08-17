@@ -149,17 +149,6 @@ export async function getDaysWithEntries() {
     .sort((a, b) => (a.dateKey < b.dateKey ? 1 : -1));
 }
 
-// "Day N" counts distinct days you've written on, not a login streak -- it
-// never resets for skipping a day, it just waits. Same mechanic as the rest
-// of the Make It Local family: every distinct day already written to counts,
-// plus one more slot for today if today doesn't have any words yet.
-export async function getDayNumber(asOfKey = todayKey()) {
-  const days = await getDaysWithEntries();
-  const distinctBefore = days.filter((d) => d.dateKey <= asOfKey).length;
-  const hasEntryAsOf = days.some((d) => d.dateKey === asOfKey);
-  return distinctBefore + (hasEntryAsOf ? 0 : 1);
-}
-
 // Past days since first-open with nothing written at all -- what the
 // Calendar offers to catch up on.
 export async function getMissedDateKeys() {
