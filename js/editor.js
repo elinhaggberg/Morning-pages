@@ -1,6 +1,8 @@
 import { saveDraftText, commitEntry, decryptEntry, countWords, todayKey, getWordGoal } from "./storage.js";
 import { formatDate } from "./util.js";
 import { openSheet } from "./sheet.js";
+import { isUnlocked } from "./crypto.js";
+import { promptUnlock } from "./unlock.js";
 
 const CHECK_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.5l5 5 10-11"/></svg>';
 
@@ -89,6 +91,13 @@ export async function buildEditorEl({ dateKey, draftEntry, onCommitted, onChange
       errorEl.textContent = "Write something before saving to log.";
       errorEl.classList.remove("hidden");
       return;
+    }
+    // Filing a page into the permanent log is the one moment that actually
+    // needs the vault -- ask for it right here, inline, rather than at app
+    // open. Cancelling just leaves the page as a draft; nothing is lost.
+    if (!isUnlocked()) {
+      const unlocked = await promptUnlock();
+      if (!unlocked) return;
     }
     const committed = await commitEntry(currentId);
     if (onCommitted) onCommitted(committed);

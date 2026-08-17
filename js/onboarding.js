@@ -38,7 +38,7 @@ export function renderOnboarding(root, onComplete) {
         <h1 class="onboarding-title">These pages are private</h1>
         <div class="onboarding-body">
           <p>Morning Pages are traditionally written for no one — not an audience, not even a future version of yourself rereading them. The point is to let whatever's in your head land on the page without performing, editing, or worrying about who might see it.</p>
-          <p>So every page here is encrypted with a phrase only you know. Not stored anywhere, not recoverable by anyone — including whoever built this app. That's what makes it safe to write completely freely.</p>
+          <p>So every page here is encrypted with a phrase only you know — not stored anywhere, not recoverable by anyone, including whoever built this app. You won't be asked for it just to open the app or start writing, though: it's only asked for the moment you save a page to your permanent log, or go back to read one you already saved. Writing itself stays as frictionless as a blank page should be.</p>
           <p>Next you'll choose four words as your own private key.</p>
         </div>
         <div class="onboarding-actions">
@@ -166,8 +166,8 @@ export function renderOnboarding(root, onComplete) {
             <p>Tap <strong>Save to log</strong> whenever you're done to file today's page away as a card. Everything also autosaves as you type either way, so nothing is lost if you close the app mid-thought.</p>
           </section>
           <section>
-            <h3>Locked by default</h3>
-            <p>Closing and reopening the app always asks for your four words again — that's what keeps these pages private. My Log and the Calendar (in the menu) let you revisit past days, but a page's actual words only ever show up when you deliberately tap to open it.</p>
+            <h3>Your phrase, only when it matters</h3>
+            <p>Opening the app or writing a fresh page never asks for your four words. They're asked for at exactly two moments: saving a page to your permanent log, and opening a page you already saved. Until either of those happens, a page in progress is still encrypted, just not yet under your phrase — filing it away is what actually locks it for good.</p>
           </section>
           <section>
             <h3>Your data, your device</h3>

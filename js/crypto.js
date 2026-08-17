@@ -1,14 +1,25 @@
-// Every page is encrypted with a key derived from a four-word phrase the
-// person chooses themselves at onboarding. The phrase is never stored --
-// only a random salt and a "verifier" (a known string encrypted with the
-// derived key, used to check a guess is right without ever persisting the
-// key or phrase itself). The derived key lives only in memory for the life
-// of this tab; reloading the app always means entering the phrase again.
+// Two tiers of encryption, so writing never waits on the phrase but the
+// permanent log always does:
+//
+// - The "device" key is generated once, sits in localStorage in the clear,
+//   and loads automatically -- no phrase needed. It protects an
+//   in-progress page from a casual glance (it's not human-readable
+//   plaintext sitting in IndexedDB) but it is NOT a secret; anyone with the
+//   device can read what it protects. It's what a fresh, unsaved page is
+//   encrypted with while you're still writing it.
+// - The "vault" key is derived from the four-word phrase, exactly as
+//   before: never stored, lives only in memory for this tab, and is the
+//   only thing that can decrypt a page once it's been saved to the log.
+//   Committing a page (or opening one already committed) re-encrypts it
+//   under this key, which is the one moment the phrase actually gets asked
+//   for.
 const CONFIG_KEY = "mp_crypto_v1";
+const DEVICE_KEY_STORAGE_KEY = "mp_device_key_v1";
 const PBKDF2_ITERATIONS = 250000;
 const VERIFIER_PLAINTEXT = "morning-pages-unlock-check";
 
-let liveKey = null;
+let vaultKey = null;
+let deviceKeyPromise = null;
 
 function b64FromBytes(bytes) {
   let binary = "";
@@ -57,11 +68,11 @@ export function hasPassphrase() {
 }
 
 export function isUnlocked() {
-  return liveKey !== null;
+  return vaultKey !== null;
 }
 
 export function lock() {
-  liveKey = null;
+  vaultKey = null;
 }
 
 // First-time setup: picks a fresh salt, derives the key, and stores just
@@ -85,7 +96,7 @@ export async function setupPassphrase(words) {
     })
   );
 
-  liveKey = key;
+  vaultKey = key;
 }
 
 // Adopts a salt/verifier pair from an imported backup instead of generating
@@ -114,7 +125,7 @@ export async function unlock(words) {
   } catch {
     return false;
   }
-  liveKey = key;
+  vaultKey = key;
   return true;
 }
 
@@ -136,16 +147,49 @@ export async function verifyAgainstConfig(words, config) {
   }
 }
 
-export async function encryptText(plaintext) {
-  if (!liveKey) throw new Error("locked");
+export async function encryptVaultText(plaintext) {
+  if (!vaultKey) throw new Error("locked");
   const iv = crypto.getRandomValues(new Uint8Array(12));
-  const cipherBuf = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, liveKey, new TextEncoder().encode(plaintext));
+  const cipherBuf = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, vaultKey, new TextEncoder().encode(plaintext));
   return { iv: b64FromBytes(iv), cipher: b64FromBytes(new Uint8Array(cipherBuf)) };
 }
 
-export async function decryptText({ iv, cipher }) {
-  if (!liveKey) throw new Error("locked");
-  const plainBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv: bytesFromB64(iv) }, liveKey, bytesFromB64(cipher));
+export async function decryptVaultText({ iv, cipher }) {
+  if (!vaultKey) throw new Error("locked");
+  const plainBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv: bytesFromB64(iv) }, vaultKey, bytesFromB64(cipher));
+  return new TextDecoder().decode(plainBuf);
+}
+
+// Loads (or, on first-ever call, generates) the device key. Never throws,
+// never asks for anything -- this is what lets a fresh page start
+// encrypting itself the instant you type, with no gate in front of it.
+function getDeviceKey() {
+  if (!deviceKeyPromise) {
+    deviceKeyPromise = (async () => {
+      let bytes;
+      const stored = localStorage.getItem(DEVICE_KEY_STORAGE_KEY);
+      if (stored) {
+        bytes = bytesFromB64(stored);
+      } else {
+        bytes = crypto.getRandomValues(new Uint8Array(32));
+        localStorage.setItem(DEVICE_KEY_STORAGE_KEY, b64FromBytes(bytes));
+      }
+      return crypto.subtle.importKey("raw", bytes, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]);
+    })();
+  }
+  return deviceKeyPromise;
+}
+
+export async function encryptDeviceText(plaintext) {
+  const key = await getDeviceKey();
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const cipherBuf = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, new TextEncoder().encode(plaintext));
+  return { iv: b64FromBytes(iv), cipher: b64FromBytes(new Uint8Array(cipherBuf)) };
+}
+
+export async function decryptDeviceText({ iv, cipher }) {
+  const key = await getDeviceKey();
+  const plainBuf = await crypto.subtle.decrypt({ name: "AES-GCM", iv: bytesFromB64(iv) }, key, bytesFromB64(cipher));
   return new TextDecoder().decode(plainBuf);
 }
 
@@ -154,5 +198,7 @@ export async function decryptText({ iv, cipher }) {
 // (storage.js) since this module doesn't own the DB connection.
 export function forgetPassphrase() {
   localStorage.removeItem(CONFIG_KEY);
-  liveKey = null;
+  localStorage.removeItem(DEVICE_KEY_STORAGE_KEY);
+  vaultKey = null;
+  deviceKeyPromise = null;
 }

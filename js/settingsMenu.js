@@ -39,7 +39,7 @@ export function openSettingsMenu(refresh) {
   });
   el.querySelector("#lock-btn").addEventListener("click", () => {
     lock();
-    location.reload();
+    sheet.close();
   });
   el.querySelector("#app-library-link-btn").addEventListener("click", () => {
     sheet.close();

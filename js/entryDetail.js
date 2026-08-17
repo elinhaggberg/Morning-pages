@@ -2,11 +2,23 @@ import { decryptEntry, deleteEntry } from "./storage.js";
 import { openSheet } from "./sheet.js";
 import { formatTime } from "./util.js";
 import { openEntryEditorSheet } from "./editor.js";
+import { isUnlocked } from "./crypto.js";
+import { promptUnlock } from "./unlock.js";
 
 // The one place a page's actual words ever get shown -- always an explicit
 // tap away from its card, never a preview. Read-only; editing reopens it in
 // the same writing surface used to create it.
+//
+// A committed page lives under the vault key, so opening one is exactly
+// the other moment (besides Save to log) that asks for the four words --
+// asked before the sheet even opens, so a cancelled unlock just leaves the
+// card unopened instead of showing a stuck "couldn't decrypt" sheet.
 export async function openEntryDetail(entry, { refresh }) {
+  if (entry.committed && !isUnlocked()) {
+    const unlocked = await promptUnlock();
+    if (!unlocked) return;
+  }
+
   const sheet = openSheet("tpl-entry-detail");
   const el = sheet.el;
   el.querySelector(".close-btn").addEventListener("click", () => sheet.close());

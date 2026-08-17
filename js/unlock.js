@@ -1,5 +1,5 @@
 import { unlock } from "./crypto.js";
-import { eraseEverything } from "./storage.js";
+import { openSheet } from "./sheet.js";
 
 function wordInputsRow() {
   const row = document.createElement("div");
@@ -10,37 +10,46 @@ function wordInputsRow() {
   return row;
 }
 
-export function renderUnlock(root, onUnlocked) {
-  function show(buildFn) {
-    root.replaceChildren();
-    const view = document.createElement("div");
-    view.className = "onboarding-view";
-    const card = document.createElement("div");
-    card.className = "onboarding-card";
-    view.appendChild(card);
-    root.appendChild(view);
-    buildFn(card);
-  }
+// A quick, cancellable ask for the four words -- shown only at the moment
+// something actually needs the vault (saving a page to the log, or opening
+// one already saved), never at app open. Resolves true once unlocked,
+// false if dismissed, in which case the caller just doesn't do the thing
+// that needed it -- nothing is lost, since drafts autosave under the
+// device key regardless.
+export function promptUnlock() {
+  return new Promise((resolve) => {
+    const sheet = openSheet("tpl-unlock-prompt");
+    const el = sheet.el;
+    let settled = false;
+    function finish(result) {
+      if (settled) return;
+      settled = true;
+      resolve(result);
+      sheet.close();
+    }
+    el.querySelector(".close-btn").addEventListener("click", () => finish(false));
+    el.addEventListener("click", (e) => {
+      if (e.target === el) finish(false);
+    });
 
-  function showUnlock() {
-    show((card) => {
-      card.innerHTML = `
-        <h1 class="onboarding-title">Enter your four words</h1>
-        <div class="onboarding-body"><p>To keep your pages private, every fresh visit starts locked.</p></div>
-        <div id="unlock-word-slot"></div>
-        <p class="onboarding-error hidden" id="unlock-error"></p>
-        <div class="onboarding-actions">
-          <button type="button" class="text-btn primary" id="unlock-btn">Unlock</button>
+    const body = el.querySelector("#unlock-prompt-body");
+
+    function showAsk() {
+      body.innerHTML = `
+        <div id="unlock-prompt-word-slot"></div>
+        <p class="onboarding-error hidden" id="unlock-prompt-error"></p>
+        <div class="form-actions">
+          <button type="button" class="text-btn secondary" id="unlock-prompt-cancel-btn">Cancel</button>
+          <button type="button" class="text-btn primary" id="unlock-prompt-unlock-btn">Unlock</button>
         </div>
-        <button type="button" class="onboarding-link-btn" id="forgot-link">Forgot your phrase?</button>
+        <button type="button" class="onboarding-link-btn" id="unlock-prompt-forgot-link">Forgot your phrase?</button>
       `;
       const row = wordInputsRow();
-      card.querySelector("#unlock-word-slot").appendChild(row);
+      body.querySelector("#unlock-prompt-word-slot").appendChild(row);
       const inputs = [...row.querySelectorAll(".word-input")];
       inputs[0].focus();
-
-      const errorEl = card.querySelector("#unlock-error");
-      const unlockBtn = card.querySelector("#unlock-btn");
+      const errorEl = body.querySelector("#unlock-prompt-error");
+      const unlockBtn = body.querySelector("#unlock-prompt-unlock-btn");
 
       async function attempt() {
         const words = inputs.map((i) => i.value);
@@ -53,9 +62,8 @@ export function renderUnlock(root, onUnlocked) {
           errorEl.classList.remove("hidden");
           return;
         }
-        onUnlocked();
+        finish(true);
       }
-
       unlockBtn.addEventListener("click", attempt);
       inputs.forEach((input, idx) => {
         input.addEventListener("keydown", (e) => {
@@ -65,41 +73,20 @@ export function renderUnlock(root, onUnlocked) {
           }
         });
       });
+      body.querySelector("#unlock-prompt-cancel-btn").addEventListener("click", () => finish(false));
+      body.querySelector("#unlock-prompt-forgot-link").addEventListener("click", showForgot);
+    }
 
-      card.querySelector("#forgot-link").addEventListener("click", showForgot);
-    });
-  }
-
-  function showForgot() {
-    show((card) => {
-      card.innerHTML = `
-        <h1 class="onboarding-title">No way back in</h1>
-        <div class="onboarding-body">
-          <p>Your four words were never stored anywhere — not by this app, not by anyone. If they're truly gone, so is everything written under them. There's no support line or account recovery that can help.</p>
-          <p>The only option from here is to erase this device's Morning Pages and start over.</p>
-        </div>
-        <label class="onboarding-checkbox-row">
-          <input type="checkbox" id="forgot-confirm-check" />
-          <span>I understand this permanently deletes every page</span>
-        </label>
-        <div class="onboarding-actions">
-          <button type="button" class="text-btn secondary" id="forgot-back-btn">Back</button>
-          <button type="button" class="text-btn danger" id="forgot-erase-btn" disabled>Erase and start over</button>
+    function showForgot() {
+      body.innerHTML = `
+        <p class="settings-note">Your four words were never stored anywhere, so there's no way to recover them -- not by this app, not by anyone. The only way forward is erasing this device's Morning Pages and starting fresh, from the menu's <strong>Export &amp; manage data</strong> once you close this.</p>
+        <div class="form-actions">
+          <button type="button" class="text-btn secondary" id="unlock-prompt-back-btn">Back</button>
         </div>
       `;
-      card.querySelector("#forgot-back-btn").addEventListener("click", showUnlock);
-      const checkbox = card.querySelector("#forgot-confirm-check");
-      const eraseBtn = card.querySelector("#forgot-erase-btn");
-      checkbox.addEventListener("change", () => {
-        eraseBtn.disabled = !checkbox.checked;
-      });
-      eraseBtn.addEventListener("click", async () => {
-        eraseBtn.disabled = true;
-        await eraseEverything();
-        window.location.reload();
-      });
-    });
-  }
+      body.querySelector("#unlock-prompt-back-btn").addEventListener("click", showAsk);
+    }
 
-  showUnlock();
+    showAsk();
+  });
 }

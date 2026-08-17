@@ -2,9 +2,8 @@ import { renderHome } from "./views/home.js";
 import { renderLog } from "./views/log.js";
 import { renderCalendar } from "./views/calendar.js";
 import { applyTheme } from "./theme.js";
-import { hasPassphrase, isUnlocked } from "./crypto.js";
+import { hasPassphrase } from "./crypto.js";
 import { renderOnboarding } from "./onboarding.js";
-import { renderUnlock } from "./unlock.js";
 
 applyTheme();
 
@@ -38,17 +37,15 @@ function routeToView() {
   }
 }
 
-// Gates everything behind the passphrase before any hash-based routing
-// happens: no passphrase set up yet -> onboarding; set up but not unlocked
-// in this tab's memory (true on every fresh load, by design) -> the unlock
-// screen; only once unlocked does the normal Home/Log/Calendar router run.
+// Onboarding (choosing the four-word phrase) is the only thing gating the
+// app -- once that's done, Home/Log/Calendar are always reachable straight
+// away. Writing today's page never needs the vault unlocked (see editor.js
+// and crypto.js's device key); only opening or saving a page that's part of
+// the permanent log does, and that's asked for inline, right when it's
+// needed -- see unlock.js's promptUnlock.
 function boot() {
   if (!hasPassphrase()) {
     renderOnboarding(root, boot);
-    return;
-  }
-  if (!isUnlocked()) {
-    renderUnlock(root, boot);
     return;
   }
   window.addEventListener("hashchange", routeToView);

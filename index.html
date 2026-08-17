@@ -99,6 +99,17 @@
   </div>
 </template>
 
+<!-- ===== Inline unlock prompt (asked only when a saved page is actually opened or a page is saved to the log) ===== -->
+<template id="tpl-unlock-prompt">
+  <div class="sheet unlock-prompt-sheet">
+    <header class="sheet-header">
+      <h2>Enter your four words</h2>
+      <button class="icon-btn close-btn" aria-label="Cancel"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+    <div id="unlock-prompt-body"></div>
+  </div>
+</template>
+
 <!-- ===== Day detail ===== -->
 <template id="tpl-day-detail">
   <div class="sheet day-detail-sheet">
@@ -171,7 +182,7 @@
     </header>
 
     <p class="card-detail-section-label">Full backup</p>
-    <p class="settings-note">Every page, still fully encrypted — safe to store anywhere, but only ever readable with your four words.</p>
+    <p class="settings-note">Every page saved to your log, still fully encrypted — safe to store anywhere, but only ever readable with your four words. A page still in progress isn't included yet; save it to your log first if you want it backed up.</p>
     <div class="form-actions">
       <button type="button" class="text-btn primary" id="data-export-all-btn">Export everything</button>
     </div>
@@ -212,7 +223,7 @@
       </section>
       <section>
         <h3>Privacy &amp; the four words</h3>
-        <p>Every page is encrypted with the four-word phrase you set up when you first opened the app. It's never stored anywhere, which means every fresh visit asks for it again — and it also means there is no password reset. Losing the phrase means losing everything written under it, permanently.</p>
+        <p>Writing never asks for your phrase — a page in progress is encrypted the moment you type, under a key that lives quietly on this device. Your four words only get asked for at two moments: <strong>Save to log</strong>, which is what actually locks a page under your phrase for good, and opening a page you already saved. It's never stored anywhere, and there is no password reset — losing it means losing everything already saved under it, permanently.</p>
         <p>A page's actual text is never shown anywhere except right after you tap to open it — cards in My Log and the Calendar only ever show a date, a time, and a word count.</p>
       </section>
       <section>
@@ -221,7 +232,7 @@
       </section>
       <section>
         <h3>Your data, your device</h3>
-        <p>Everything lives only in this browser, on this device — there's no account and no server. <strong>Export &amp; manage data</strong> lets you export a full, still-encrypted backup at any time.</p>
+        <p>Everything lives only in this browser, on this device — there's no account and no server. <strong>Export &amp; manage data</strong> lets you export a full, still-encrypted backup at any time — it covers everything saved to your log; a page still in progress hasn't been filed away yet, so it stays local to this device until you tap Save to log.</p>
         <p><strong>Removing the app from your Home Screen deletes its saved data too.</strong> Export a backup every so often.</p>
       </section>
     </div>

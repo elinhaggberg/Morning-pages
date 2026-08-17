@@ -12,18 +12,19 @@ Part of the [Make It Local](https://github.com/elinhaggberg) family of small, ad
 - **A quiet word goal**, not a requirement. Default 750 words (about three handwritten pages), adjustable in Customize.
 - **Save to log**, or don't. Everything autosaves as you type either way, so nothing is lost if you close the app mid-thought. "Save to log" just files the page away as a card and clears space for a new one — useful if you want to write more than once a day, diary-style.
 - **My Log & Calendar catch-up** — every day you've written something, and a way to retroactively write for a day you missed.
-- **Playful / Light / Dark themes**, with a choice of accent colors in Playful mode. Dark is the default here, since morning pages are traditionally written before first light.
+- **Playful / Light / Dark themes**, with a choice of accent colors in Playful mode. Playful with the Midnight accent is the default.
 
 ## Privacy by encryption
 
-Morning Pages are traditionally written for no one — not an audience, not even a future version of yourself rereading them. To make that private-by-nature, every page in this app is **encrypted**:
+Morning Pages are traditionally written for no one — not an audience, not even a future version of yourself rereading them. To make that private-by-nature, every page in this app is **encrypted**, but never at the cost of making writing itself feel gated:
 
-- The first time you open the app, you choose your own **four-word phrase**. It becomes the key everything is encrypted with.
-- That phrase is **never stored anywhere** — not in this app, not on any server. Every fresh visit asks for it again before showing anything.
+- The first time you open the app, you choose your own **four-word phrase**. It becomes the key that protects your permanent log — never stored anywhere, not in this app, not on any server.
+- Writing a fresh page never asks for it. A page in progress is encrypted the instant you type, under a key that lives quietly on this device — enough to keep it from being plainly readable, though not a secret the way your phrase is.
+- Your four words only get asked for at two moments: **Save to log** — which re-encrypts the page under your phrase and is what actually makes it part of the protected, permanent log — and opening a page you already saved.
 - A page's actual words are never shown anywhere except the moment you deliberately tap to open it. Cards in My Log and the Calendar only ever show a date, a time, and a word count — never a preview of the text.
-- **There is no password reset.** If you lose your four words, everything written under them is permanently unreadable. Onboarding makes you write the phrase down and confirm you've saved it before you can start.
+- **There is no password reset.** If you lose your four words, everything already saved to your log is permanently unreadable. Onboarding makes you write the phrase down and confirm you've saved it before you can start.
 
-This is a deliberate trade: real privacy in exchange for real responsibility. Save your phrase somewhere durable (a password manager, a safe, anywhere but "I'll remember it").
+This is a deliberate trade: real privacy for anything you file away, in exchange for real responsibility for the phrase that protects it. Save it somewhere durable (a password manager, a safe, anywhere but "I'll remember it").
 
 ## Running it
 
@@ -35,7 +36,7 @@ npx serve .
 
 ## Data & privacy
 
-Everything is stored locally in this browser (IndexedDB for entries, all of it encrypted; localStorage for the salt/verifier used to check your phrase and for preferences) — there's no account, no backend, and no analytics. Removing the app from your Home Screen deletes its data too, so back up from the menu every so often. The exported backup file stays fully encrypted, so it's safe to store anywhere — it's only ever readable with the four words it was made under.
+Everything is stored locally in this browser (IndexedDB for entries, all of it encrypted; localStorage for the salt/verifier used to check your phrase, an unprotected local key for in-progress pages, and preferences) — there's no account, no backend, and no analytics. Removing the app from your Home Screen deletes its data too, so back up from the menu every so often. The exported backup only includes pages saved to your log (a page still in progress isn't part of it yet) and stays fully encrypted, so it's safe to store anywhere — it's only ever readable with the four words it was made under.
 
 ## License
 
