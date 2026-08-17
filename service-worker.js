@@ -1,4 +1,4 @@
-const CACHE_NAME = "morning-pages-v1";
+const CACHE_NAME = "morning-pages-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -7,6 +7,7 @@ const APP_SHELL = [
   "./js/app.js",
   "./js/db.js",
   "./js/crypto.js",
+  "./js/wordlist.js",
   "./js/storage.js",
   "./js/theme.js",
   "./js/util.js",

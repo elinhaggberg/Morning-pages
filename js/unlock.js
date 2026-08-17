@@ -1,4 +1,4 @@
-import { unlock } from "./crypto.js";
+import { unlock, hasBiometricUnlock, unlockWithBiometric } from "./crypto.js";
 import { openSheet } from "./sheet.js";
 
 function wordInputsRow() {
@@ -10,12 +10,12 @@ function wordInputsRow() {
   return row;
 }
 
-// A quick, cancellable ask for the four words -- shown only at the moment
-// something actually needs the vault (saving a page to the log, or opening
-// one already saved), never at app open. Resolves true once unlocked,
-// false if dismissed, in which case the caller just doesn't do the thing
-// that needed it -- nothing is lost, since drafts autosave under the
-// device key regardless.
+// A quick, cancellable ask for the four words (or, if enabled, a biometric
+// shortcut) -- shown only at the moment something actually needs the vault
+// (saving a page to the log, or opening one already saved), never at app
+// open. Resolves true once unlocked, false if dismissed, in which case the
+// caller just doesn't do the thing that needed it -- nothing is lost,
+// since drafts autosave under the device key regardless.
 export function promptUnlock() {
   return new Promise((resolve) => {
     const sheet = openSheet("tpl-unlock-prompt");
@@ -33,6 +33,32 @@ export function promptUnlock() {
     });
 
     const body = el.querySelector("#unlock-prompt-body");
+    const bioEnabled = hasBiometricUnlock();
+
+    function showBiometric() {
+      body.innerHTML = `
+        <div class="form-actions">
+          <button type="button" class="text-btn primary" id="unlock-prompt-bio-btn">Unlock with Face ID / Touch ID</button>
+        </div>
+        <p class="onboarding-error hidden" id="unlock-prompt-bio-error"></p>
+        <button type="button" class="onboarding-link-btn" id="unlock-prompt-use-phrase-link">Use your four words instead</button>
+      `;
+      const bioBtn = body.querySelector("#unlock-prompt-bio-btn");
+      const errorEl = body.querySelector("#unlock-prompt-bio-error");
+      bioBtn.addEventListener("click", async () => {
+        bioBtn.disabled = true;
+        errorEl.classList.add("hidden");
+        const ok = await unlockWithBiometric();
+        bioBtn.disabled = false;
+        if (ok) {
+          finish(true);
+          return;
+        }
+        errorEl.textContent = "That didn't work. Try again, or use your four words instead.";
+        errorEl.classList.remove("hidden");
+      });
+      body.querySelector("#unlock-prompt-use-phrase-link").addEventListener("click", showAsk);
+    }
 
     function showAsk() {
       body.innerHTML = `
@@ -42,6 +68,7 @@ export function promptUnlock() {
           <button type="button" class="text-btn secondary" id="unlock-prompt-cancel-btn">Cancel</button>
           <button type="button" class="text-btn primary" id="unlock-prompt-unlock-btn">Unlock</button>
         </div>
+        ${bioEnabled ? '<button type="button" class="onboarding-link-btn" id="unlock-prompt-use-bio-link">Use Face ID / Touch ID instead</button>' : ""}
         <button type="button" class="onboarding-link-btn" id="unlock-prompt-forgot-link">Forgot your phrase?</button>
       `;
       const row = wordInputsRow();
@@ -75,6 +102,9 @@ export function promptUnlock() {
       });
       body.querySelector("#unlock-prompt-cancel-btn").addEventListener("click", () => finish(false));
       body.querySelector("#unlock-prompt-forgot-link").addEventListener("click", showForgot);
+      if (bioEnabled) {
+        body.querySelector("#unlock-prompt-use-bio-link").addEventListener("click", showBiometric);
+      }
     }
 
     function showForgot() {
@@ -87,6 +117,10 @@ export function promptUnlock() {
       body.querySelector("#unlock-prompt-back-btn").addEventListener("click", showAsk);
     }
 
-    showAsk();
+    if (bioEnabled) {
+      showBiometric();
+    } else {
+      showAsk();
+    }
   });
 }

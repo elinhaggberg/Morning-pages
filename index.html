@@ -48,20 +48,28 @@
     </header>
     <div class="instructions-body">
       <section>
-        <h3>A page a day</h3>
-        <p>Open the app and it goes straight to a blank page — no prompts, no setup. A quiet word count at the bottom tracks against a daily goal (750 words by default, about three handwritten pages) with a small checkmark once you reach it. Keep writing past it or stop early — entirely up to you.</p>
+        <h3>It's a PWA</h3>
+        <p>This is a "Progressive Web App" — a website that behaves like an installed app. Add it to your Home Screen from the browser's share/menu button and it opens full-screen and works offline, no app store involved.</p>
       </section>
       <section>
-        <h3>Save to log, or just write</h3>
-        <p>Tap <strong>Save to log</strong> to file a page away as a card and start fresh — useful if you want to write more than once a day, diary-style. Everything autosaves as you type either way. My Log and the Calendar, in the menu, hold everything you've written and let you catch up on a day you missed.</p>
+        <h3>Your data, your device</h3>
+        <p>There's no central database. Everything you write lives only in this browser, on this device — nothing is sent to a server, because there isn't one.</p>
+      </section>
+      <section>
+        <h3>Private by encryption, not by friction</h3>
+        <p>Every page is sealed under a four-word phrase the app generates for you — never stored anywhere, so there's no password reset if it's lost. Writing itself never waits on it: a fresh page encrypts itself instantly with a key that lives quietly on this device. The phrase is only asked for at two moments — saving a page to your permanent log, and opening one you already saved — and Face ID, Touch ID, or a fingerprint can stand in for typing it, if this device supports it.</p>
       </section>
       <section>
         <h3>Install it before setting up your passphrase</h3>
-        <p>If you plan to add this to your Home Screen, do that first — before choosing your four words next. On some phones, especially iPhone, the installed app and this browser tab keep separate storage, so setting everything up here and installing afterward could mean starting over from scratch.</p>
+        <p>If you plan to add this to your Home Screen, do that first — before your four words are generated next. On some phones, especially iPhone, the installed app and this browser tab keep separate storage, so setting everything up here and installing afterward could mean starting over from scratch.</p>
       </section>
       <section>
-        <h3>Deleting the app deletes everything, silently</h3>
-        <p>Removing this app from your Home Screen — or clearing this site's data in your browser — erases every page and your passphrase instantly. There's no warning, no confirmation, and no undo. That's exactly why regular backups matter: <strong>Export &amp; manage data</strong>, in the menu, any time you like.</p>
+        <h3>Backups are on you</h3>
+        <p>That also means backing up is your responsibility. There's no account recovery and no "we've got your data" safety net — export a backup every so often, especially before switching devices or clearing your browser's data.</p>
+      </section>
+      <section>
+        <h3>The app itself can still update</h3>
+        <p>The look, features, and bug fixes can improve over time — that's just code changing. Updates never touch your data; it stays exactly where it is.</p>
       </section>
     </div>
     <div class="form-actions">
@@ -185,6 +193,10 @@
       <svg class="icon" viewBox="0 0 512 512" aria-hidden="true" focusable="false"><rect x="32" y="86" width="448" height="32" rx="16" /><circle cx="176" cy="102" r="40" /><rect x="32" y="240" width="448" height="32" rx="16" /><circle cx="336" cy="256" r="40" /><rect x="32" y="394" width="448" height="32" rx="16" /><circle cx="256" cy="410" r="40" /></svg>
       <span>Customize</span>
     </button>
+    <button type="button" class="menu-item" id="biometric-btn">
+      <svg class="icon icon-line" viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a5 5 0 0 1 5 5v2a5 5 0 0 1-2 4"/><path d="M7 8a5 5 0 0 1 8-4"/><path d="M7 8v2c0 3-1 5-2.5 6.5"/><path d="M12 8v3c0 4-1.5 6.5-4 8"/><path d="M16 8v2.5c0 2.5-.5 4.5-1.5 6"/></svg>
+      <span>Face ID &amp; Touch ID</span>
+    </button>
     <button type="button" class="menu-item" id="data-btn">
       <svg class="icon icon-line" viewBox="0 0 24 24" aria-hidden="true" focusable="false" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6a8 3 0 0 0 16 0A8 3 0 0 0 4 6zM4 6v12a8 3 0 0 0 16 0V6"/><path d="M4 12a8 3 0 0 0 16 0"/></svg>
       <span>Export &amp; manage data</span>
@@ -254,7 +266,8 @@
       </section>
       <section>
         <h3>Privacy &amp; the four words</h3>
-        <p>Writing never asks for your phrase — a page in progress is encrypted the moment you type, under a key that lives quietly on this device. Your four words only get asked for at two moments: <strong>Save to log</strong>, which is what actually locks a page under your phrase for good, and opening a page you already saved. It's never stored anywhere, and there is no password reset — losing it means losing everything already saved under it, permanently.</p>
+        <p>Your four words were generated by the app at setup, not typed in — real, unbiased randomness, not a phrase someone could guess. Writing never asks for it — a page in progress is encrypted the moment you type, under a key that lives quietly on this device. It's only asked for at two moments: <strong>Save to log</strong>, which is what actually locks a page under your phrase for good, and opening a page you already saved. It's never stored anywhere, and there is no password reset — losing it means losing everything already saved under it, permanently.</p>
+        <p>If this device supports it, Face ID, Touch ID, or a fingerprint can stand in for typing the phrase — turn it on or off any time from <strong>Face ID &amp; Touch ID</strong> in the menu. It's an added shortcut, never a replacement; your four words keep working everywhere, always.</p>
         <p>A page's actual text is never shown anywhere except right after you tap to open it — cards in My Log and the Calendar only ever show a date, a time, and a word count.</p>
       </section>
       <section>
@@ -328,6 +341,21 @@
     <label class="field">
       <input type="number" id="word-goal-input" min="1" step="1" />
     </label>
+  </div>
+</template>
+
+<!-- ===== Face ID / Touch ID ===== -->
+<template id="tpl-biometric">
+  <div class="sheet">
+    <header class="sheet-header">
+      <h2>Face ID &amp; Touch ID</h2>
+      <button class="icon-btn close-btn" aria-label="Close"><svg class="icon" viewBox="0 0 384 512" aria-hidden="true" focusable="false"><path d="M55.1 73.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3L147.2 256 9.9 393.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0L192.5 301.3 329.9 438.6c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L237.8 256 375.1 118.6c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L192.5 210.7 55.1 73.4z"/></svg></button>
+    </header>
+    <p class="settings-note" id="biometric-status"></p>
+    <p class="onboarding-error hidden" id="biometric-error"></p>
+    <div class="form-actions">
+      <button type="button" class="text-btn primary" id="biometric-action-btn">Turn on</button>
+    </div>
   </div>
 </template>
 

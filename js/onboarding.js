@@ -1,4 +1,4 @@
-import { setupPassphrase, adoptConfig, verifyAgainstConfig, unlock, normalizePhrase } from "./crypto.js";
+import { setupPassphrase, adoptConfig, verifyAgainstConfig, unlock, generatePassphrase, isBiometricAvailable, enableBiometricUnlock } from "./crypto.js";
 import { importEntries } from "./storage.js";
 import { openSheet } from "./sheet.js";
 
@@ -16,13 +16,12 @@ function readWords(row) {
 }
 
 // Runs the full first-open flow: a general "how this app works" orientation
-// first (crucially, before anything is set up, since it's the one chance to
-// say "install this now, before choosing a passphrase, or you may end up
+// first (before anything is set up, since it's the one chance to say
+// "install this now, before your passphrase exists, or you may end up
 // setting one up somewhere you won't be using day to day"), then why pages
-// are encrypted, letting the person choose their own four words, and making
-// them confirm it and save it somewhere safe -- or, via the restore link on
-// the privacy screen, skip straight to recovering an existing backup
-// instead of creating a new phrase.
+// are encrypted, a generated four-word phrase to save, and an optional
+// Face ID / Touch ID offer -- or, via the restore link on the privacy
+// screen, skip straight to recovering an existing backup instead.
 export function renderOnboarding(root, onComplete) {
   function show(buildFn) {
     root.replaceChildren();
@@ -57,87 +56,35 @@ export function renderOnboarding(root, onComplete) {
         <h1 class="onboarding-title">These pages are private</h1>
         <div class="onboarding-body">
           <p>Morning Pages are traditionally written for no one — not an audience, not even a future version of yourself rereading them. The point is to let whatever's in your head land on the page without performing, editing, or worrying about who might see it.</p>
-          <p>So every page here is encrypted with a phrase only you know — not stored anywhere, not recoverable by anyone, including whoever built this app. You won't be asked for it just to open the app or start writing, though: it's only asked for the moment you save a page to your permanent log, or go back to read one you already saved. Writing itself stays as frictionless as a blank page should be.</p>
-          <p>Next you'll choose four words as your own private key.</p>
+          <p>So every page here is encrypted with a phrase only you have — not stored anywhere, not recoverable by anyone, including whoever built this app. You won't be asked for it just to open the app or start writing, though: it's only asked for the moment you save a page to your permanent log, or go back to read one you already saved. Writing itself stays as frictionless as a blank page should be.</p>
+          <p>Next, the app will generate four random words as your own private key.</p>
         </div>
         <div class="onboarding-actions">
           <button type="button" class="text-btn primary" id="ob-begin-btn">Continue</button>
         </div>
         <button type="button" class="onboarding-link-btn" id="ob-restore-link">Already have Morning Pages elsewhere? Restore a backup</button>
       `;
-      card.querySelector("#ob-begin-btn").addEventListener("click", showCreate);
+      card.querySelector("#ob-begin-btn").addEventListener("click", showGenerated);
       card.querySelector("#ob-restore-link").addEventListener("click", showRestorePicker);
     });
   }
 
-  function showCreate() {
+  // No retyping to confirm here -- there's nothing to mistype. The words
+  // come from the app, displayed once; saving them somewhere safe (not
+  // memorizing them) is the actual plan, same as before.
+  function showGenerated() {
+    const words = generatePassphrase();
+    const phrase = words.join(" ");
     show((card) => {
       card.innerHTML = `
-        <p class="onboarding-eyebrow">Step 1 of 3</p>
-        <h1 class="onboarding-title">Choose four words</h1>
-        <div class="onboarding-body">
-          <p>These four words are your key — the only way anything you write can be unlocked and read again. Pick something personal and memorable, not a quote from a book or song.</p>
-        </div>
-        <div id="ob-word-slot"></div>
-        <p class="onboarding-error hidden" id="ob-create-error"></p>
-        <div class="onboarding-actions">
-          <button type="button" class="text-btn primary" id="ob-create-continue-btn">Continue</button>
-        </div>
-      `;
-      const row = wordInputsRow();
-      card.querySelector("#ob-word-slot").appendChild(row);
-      row.querySelector(".word-input").focus();
-      card.querySelector("#ob-create-continue-btn").addEventListener("click", () => {
-        const words = readWords(row);
-        const errorEl = card.querySelector("#ob-create-error");
-        if (words.some((w) => !w.trim())) {
-          errorEl.textContent = "Fill in all four words.";
-          errorEl.classList.remove("hidden");
-          return;
-        }
-        showConfirm(words);
-      });
-    });
-  }
-
-  function showConfirm(chosenWords) {
-    show((card) => {
-      card.innerHTML = `
-        <p class="onboarding-eyebrow">Step 2 of 3</p>
-        <h1 class="onboarding-title">Type them again</h1>
-        <div class="onboarding-body"><p>Just to be sure there's no typo — this is the only chance to catch one.</p></div>
-        <div id="ob-word-slot"></div>
-        <p class="onboarding-error hidden" id="ob-confirm-error"></p>
-        <div class="onboarding-actions">
-          <button type="button" class="text-btn secondary" id="ob-confirm-back-btn">Back</button>
-          <button type="button" class="text-btn primary" id="ob-confirm-continue-btn">Continue</button>
-        </div>
-      `;
-      const row = wordInputsRow();
-      card.querySelector("#ob-word-slot").appendChild(row);
-      row.querySelector(".word-input").focus();
-      card.querySelector("#ob-confirm-back-btn").addEventListener("click", showCreate);
-      card.querySelector("#ob-confirm-continue-btn").addEventListener("click", () => {
-        const retyped = readWords(row);
-        const errorEl = card.querySelector("#ob-confirm-error");
-        if (normalizePhrase(retyped) !== normalizePhrase(chosenWords)) {
-          errorEl.textContent = "That doesn't match what you typed before. Try again.";
-          errorEl.classList.remove("hidden");
-          return;
-        }
-        showSave(chosenWords);
-      });
-    });
-  }
-
-  function showSave(words) {
-    show((card) => {
-      const phrase = words.map((w) => w.trim().toLowerCase()).join(" ");
-      card.innerHTML = `
-        <p class="onboarding-eyebrow">Step 3 of 3</p>
-        <h1 class="onboarding-title">Save this somewhere safe</h1>
+        <p class="onboarding-eyebrow">Your private key</p>
+        <h1 class="onboarding-title">Save these four words</h1>
+        <div class="onboarding-body"><p>Generated just now, for you alone. Don't like the combination? Regenerate for a new one -- either way, this phrase is the only way anything you write can be unlocked and read again.</p></div>
         <div class="onboarding-phrase-display" id="ob-phrase-display">${phrase}</div>
-        <button type="button" class="text-btn secondary onboarding-copy-btn" id="ob-copy-btn">Copy</button>
+        <div class="onboarding-phrase-actions">
+          <button type="button" class="text-btn secondary" id="ob-copy-btn">Copy</button>
+          <button type="button" class="text-btn secondary" id="ob-regenerate-btn">Regenerate</button>
+        </div>
         <div class="onboarding-warning">
           <strong>There is no password reset.</strong> If you lose these four words, every page you've written becomes permanently unreadable — there is no other way in.
           <p>Save your passphrase in a secure location — physical or a password manager is recommended.</p>
@@ -148,7 +95,7 @@ export function renderOnboarding(root, onComplete) {
           <span>I've saved this phrase somewhere safe</span>
         </label>
         <div class="onboarding-actions">
-          <button type="button" class="text-btn primary" id="ob-save-continue-btn" disabled>Start writing</button>
+          <button type="button" class="text-btn primary" id="ob-save-continue-btn" disabled>Continue</button>
         </div>
       `;
       card.querySelector("#ob-copy-btn").addEventListener("click", async () => {
@@ -159,6 +106,7 @@ export function renderOnboarding(root, onComplete) {
           setTimeout(() => (btn.textContent = "Copy"), 1500);
         } catch {}
       });
+      card.querySelector("#ob-regenerate-btn").addEventListener("click", () => showGenerated());
       const checkbox = card.querySelector("#ob-saved-check");
       const continueBtn = card.querySelector("#ob-save-continue-btn");
       checkbox.addEventListener("change", () => {
@@ -167,7 +115,46 @@ export function renderOnboarding(root, onComplete) {
       continueBtn.addEventListener("click", async () => {
         continueBtn.disabled = true;
         await setupPassphrase(words);
-        onComplete();
+        if (await isBiometricAvailable()) {
+          showBiometricOffer();
+        } else {
+          onComplete();
+        }
+      });
+    });
+  }
+
+  // Only ever reached when isBiometricAvailable() already said yes, so
+  // there's something real to offer -- entirely optional, and skippable
+  // without losing anything (the phrase from the previous screen already
+  // works on its own).
+  function showBiometricOffer() {
+    show((card) => {
+      card.innerHTML = `
+        <h1 class="onboarding-title">Unlock with Face ID or Touch ID?</h1>
+        <div class="onboarding-body">
+          <p>Instead of typing your four words every time you save a page or reopen one, you can unlock with whatever this device already uses — Face ID, Touch ID, or a fingerprint.</p>
+          <p>Your phrase still works everywhere, on every device, and remains the fallback if this is ever unavailable — this only adds a shortcut, it never replaces it.</p>
+        </div>
+        <p class="onboarding-error hidden" id="ob-bio-error"></p>
+        <div class="onboarding-actions">
+          <button type="button" class="text-btn secondary" id="ob-bio-skip-btn">Not now</button>
+          <button type="button" class="text-btn primary" id="ob-bio-enable-btn">Enable</button>
+        </div>
+      `;
+      card.querySelector("#ob-bio-skip-btn").addEventListener("click", onComplete);
+      card.querySelector("#ob-bio-enable-btn").addEventListener("click", async () => {
+        const btn = card.querySelector("#ob-bio-enable-btn");
+        const errorEl = card.querySelector("#ob-bio-error");
+        btn.disabled = true;
+        const ok = await enableBiometricUnlock();
+        if (ok) {
+          onComplete();
+          return;
+        }
+        btn.disabled = false;
+        errorEl.textContent = "That didn't work — you can try again later from the menu, or just keep using your four words.";
+        errorEl.classList.remove("hidden");
       });
     });
   }

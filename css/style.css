@@ -373,6 +373,8 @@ h1, h2, h3 { margin: 0; font-weight: 600; font-family: var(--font-heading); }
   word-break: break-word;
 }
 .onboarding-copy-btn { width: 100%; text-align: center; margin-bottom: 20px; }
+.onboarding-phrase-actions { display: flex; gap: 10px; margin-bottom: 20px; }
+.onboarding-phrase-actions .text-btn { flex: 1; text-align: center; }
 .onboarding-warning {
   padding: 16px;
   border-radius: var(--radius);

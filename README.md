@@ -18,11 +18,12 @@ Part of the [Make It Local](https://github.com/elinhaggberg) family of small, ad
 
 Morning Pages are traditionally written for no one — not an audience, not even a future version of yourself rereading them. To make that private-by-nature, every page in this app is **encrypted**, but never at the cost of making writing itself feel gated:
 
-- The first time you open the app, you choose your own **four-word phrase**. It becomes the key that protects your permanent log — never stored anywhere, not in this app, not on any server.
+- The first time you open the app, it generates your own **four-word phrase** — picked at random from the same standard wordlist crypto wallets use (BIP-39), so it carries real, guaranteed entropy rather than whatever a person might pick themselves. It becomes the key that protects your permanent log — never stored anywhere, not in this app, not on any server.
 - Writing a fresh page never asks for it. A page in progress is encrypted the instant you type, under a key that lives quietly on this device — enough to keep it from being plainly readable, though not a secret the way your phrase is.
 - Your four words only get asked for at two moments: **Save to log** — which re-encrypts the page under your phrase and is what actually makes it part of the protected, permanent log — and opening a page you already saved.
+- If your device supports it, **Face ID, Touch ID, or a fingerprint** can stand in for typing the phrase at either of those moments — an optional, revocable shortcut (via WebAuthn's PRF extension) that wraps a local copy of the vault key. Your four words always keep working too, on every device, and are never replaced.
 - A page's actual words are never shown anywhere except the moment you deliberately tap to open it. Cards in My Log and the Calendar only ever show a date, a time, and a word count — never a preview of the text.
-- **There is no password reset.** If you lose your four words, everything already saved to your log is permanently unreadable. Onboarding makes you write the phrase down and confirm you've saved it before you can start.
+- **There is no password reset.** If you lose your four words, everything already saved to your log is permanently unreadable. Onboarding makes you save the generated phrase and confirm you've done so before you can start.
 
 This is a deliberate trade: real privacy for anything you file away, in exchange for real responsibility for the phrase that protects it. Save it somewhere durable (a password manager, a safe, anywhere but "I'll remember it").
 
