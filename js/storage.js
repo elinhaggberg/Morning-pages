@@ -37,12 +37,6 @@ export function toDateKey(date) {
   return `${y}-${m}-${d}`;
 }
 
-export function addDays(dateKey, n) {
-  const d = new Date(`${dateKey}T00:00:00`);
-  d.setDate(d.getDate() + n);
-  return toDateKey(d);
-}
-
 export function todayKey() {
   return toDateKey(new Date());
 }
@@ -169,24 +163,6 @@ export async function getDaysWithEntries() {
   return [...byDate.entries()]
     .map(([dateKey, dayEntries]) => ({ dateKey, entries: dayEntries.sort((a, b) => a.createdAt - b.createdAt) }))
     .sort((a, b) => (a.dateKey < b.dateKey ? 1 : -1));
-}
-
-// Past days since first-open with nothing written at all -- what the
-// Calendar offers to catch up on.
-export async function getMissedDateKeys() {
-  const days = await getDaysWithEntries();
-  const doneDates = new Set(days.map((d) => d.dateKey));
-  const earliestEntryKey = days.length ? days[days.length - 1].dateKey : null;
-  const firstOpenKey = toDateKey(new Date(getFirstOpenAt()));
-  const startKey = earliestEntryKey && earliestEntryKey < firstOpenKey ? earliestEntryKey : firstOpenKey;
-  const today = todayKey();
-  const missed = [];
-  let cursor = startKey;
-  while (cursor < today) {
-    if (!doneDates.has(cursor)) missed.push(cursor);
-    cursor = addDays(cursor, 1);
-  }
-  return missed;
 }
 
 // ---- Export / import ----

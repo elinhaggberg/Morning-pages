@@ -11,7 +11,7 @@ Part of the [Make It Local](https://github.com/elinhaggberg) family of small, ad
 - **Straight to the page.** No home screen to navigate through — the app opens directly into today's writing.
 - **A quiet word goal**, not a requirement. Default 750 words (about three handwritten pages), adjustable in Customize.
 - **Save to log**, or don't. Everything autosaves as you type either way, so nothing is lost if you close the app mid-thought. "Save to log" just files the page away as a card and clears space for a new one — useful if you want to write more than once a day, diary-style.
-- **My Log & Calendar catch-up** — every day you've written something, and a way to retroactively write for a day you missed.
+- **My Log & Calendar** — a searchable log and a month-by-month view of every day you've written something. No catch-up feature on purpose: a morning page is for that morning, so a skipped day just stays blank.
 - **Playful / Light / Dark themes**, with a choice of accent colors in Playful mode. Playful with the Midnight accent is the default.
 
 ## Privacy by encryption

@@ -11,7 +11,6 @@
   --accent: #3e7bd9;
   --accent-text: #ffffff;
   --danger: #d9433f;
-  --catchup: #c98a2e;
   --font-heading: inherit;
   --font-serif: ui-serif, Georgia, "Times New Roman", serif;
   --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -29,7 +28,6 @@
   --accent: #b9a6ff;
   --accent-text: #1c1330;
   --danger: #ff5d5d;
-  --catchup: #e8b768;
 }
 
 :root[data-theme="playful"] {
@@ -42,7 +40,6 @@
   --accent: #3b2352;
   --accent-text: #ffffff;
   --danger: #e0454a;
-  --catchup: #c98a4a;
   --font-heading: ui-serif, Georgia, "Times New Roman", serif;
   --radius: 22px;
   --card-tint: var(--surface-2);
@@ -159,7 +156,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; font-family: var(--font-heading); }
 .sheet-header { display: flex; align-items: center; gap: 4px; padding: 10px 0 14px; }
 .sheet-header h2 { flex: 1; font-size: 1.15rem; }
 
-/* Full-screen writing sheet (adding a 2nd page, catch-up, or editing) */
+/* Full-screen writing sheet (adding a 2nd page to a day, or editing one) */
 .sheet.entry-editor-sheet {
   height: 100dvh;
   max-height: 100dvh;
@@ -314,7 +311,6 @@ h1, h2, h3 { margin: 0; font-weight: 600; font-family: var(--font-heading); }
 .calendar-day-dot { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
 .calendar-day.is-today { box-shadow: inset 0 0 0 2px var(--accent); }
 .calendar-day.is-done .calendar-day-dot { background: var(--accent); }
-.calendar-day.is-missed { background: color-mix(in srgb, var(--catchup) 12%, var(--surface-2)); }
 .calendar-day.is-blank { background: transparent; }
 .calendar-day.is-blank .calendar-day-num { color: var(--text-dim); opacity: 0.4; }
 .calendar-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.8rem; color: var(--text-dim); margin-bottom: 10px; }

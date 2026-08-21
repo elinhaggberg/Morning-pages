@@ -9,7 +9,7 @@ export const CHANGELOG = [
     version: "2026.08.17",
     date: "August 17, 2026",
     changes: [
-      "First release: encrypted daily morning pages, a word-count goal, My Log, Calendar catch-up, and export/import.",
+      "First release: encrypted daily morning pages, a word-count goal, My Log, a Calendar, and export/import.",
       "Your four-word key is now generated for you, not typed and retyped.",
       "Optional Face ID / Touch ID / fingerprint unlock, alongside your phrase.",
     ],

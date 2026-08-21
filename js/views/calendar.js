@@ -1,5 +1,5 @@
 import { getDaysWithEntries, toDateKey, getFirstOpenAt, todayKey } from "../storage.js";
-import { openDayDetail, addEntryForDate } from "../dayDetail.js";
+import { openDayDetail } from "../dayDetail.js";
 
 const WEEKDAY_LABELS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -99,8 +99,10 @@ export function renderCalendar(root, nav) {
       } else if (dateKey === todayKeyValue) {
         cell.addEventListener("click", () => nav.toHome());
       } else {
-        cell.classList.add("is-missed");
-        cell.addEventListener("click", () => addEntryForDate(dateKey, draw));
+        // A day with nothing written on it -- shown plainly, same as any
+        // other day, with no dot and nothing to tap. Morning pages are for
+        // that morning; there's no catching up on one after the fact.
+        cell.disabled = true;
       }
 
       cells.push(cell);

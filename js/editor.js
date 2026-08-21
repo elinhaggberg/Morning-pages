@@ -11,7 +11,7 @@ const CHECK_ICON = '<svg class="icon" viewBox="0 0 24 24" aria-hidden="true" foc
 // a "Save to log" action. Used two ways -- mounted directly into Home for
 // today's page (no chrome of its own needed, Home already has one), and
 // wrapped in a sheet (see openEntryEditorSheet) for adding a second page to
-// a day, editing an existing one, or catching up on a past date.
+// a day, or editing an existing one.
 export async function buildEditorEl({ dateKey, draftEntry, onCommitted, onChange }) {
   let currentId = draftEntry?.id || null;
   const initialText = draftEntry ? await decryptEntry(draftEntry) : "";
